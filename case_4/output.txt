@@ -1,0 +1,53 @@
+=== 1. 점수 기록과 조회 ===
+> ZADD leaderboard:weekly 120 alice 95 bob 150 carol
+(integer) 3
+[PASS] 멤버 3명 추가
+
+> ZINCRBY leaderboard:weekly 100 bob
+"195"
+[PASS] bob 점수가 195로 증가
+
+> ZRANGE leaderboard:weekly 0 2 REV WITHSCORES
+1) "bob"
+2) "195"
+3) "carol"
+4) "150"
+5) "alice"
+6) "120"
+[PASS] 상위 3명이 bob(195), carol(150), alice(120) 순서
+
+> ZREVRANK leaderboard:weekly alice
+(integer) 2
+[PASS] alice는 0부터 센 순위 2 (3위)
+
+> ZSCORE leaderboard:weekly bob
+"195"
+[PASS] bob 점수 195
+
+> ZREVRANK leaderboard:weekly nobody
+(nil)
+[PASS] 없는 멤버는 nil
+
+=== 2. 순위 즉시 변경 ===
+> ZINCRBY leaderboard:weekly 100 alice
+"220"
+> ZREVRANK leaderboard:weekly alice
+(integer) 0
+[PASS] alice(220)가 1위(순위 0)로 상승
+
+=== 3. 동점 정렬 규칙 ===
+ZRANGE leaderboard:tie 0 -1      -> ['a', 'b']
+ZRANGE leaderboard:tie 0 -1 REV  -> ['b', 'a']
+
+[PASS] 동점은 사전순(a, b)
+
+[PASS] REV 조회 시 역순(b, a)
+
+=== 4. 기간 만료 ===
+> EXPIRE leaderboard:weekly 604800
+(integer) 1
+[PASS] EXPIRE 성공
+
+[PASS] TTL이 7일(604,800초) 이내
+
+결과: 11/11 통과

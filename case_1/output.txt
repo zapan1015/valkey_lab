@@ -1,0 +1,48 @@
+=== 1. 캐시 어사이드: 미스 -> 저장 -> 적중 ===
+> GET product:123
+(nil)
+[PASS] 처음 조회는 캐시 미스(nil)
+
+> SET product:123 "{...}" EX 600
+OK
+[PASS] SET 성공(OK)
+
+> GET product:123
+"{\"name\":\"keyboard\",\"price\":59000}"
+[PASS] 두 번째 조회는 캐시 적중
+
+> INFO stats (발췌)
+keyspace_hits:1
+keyspace_misses:1
+[PASS] hits=1, misses=1
+
+> TTL product:123
+(integer) 599
+[PASS] TTL이 590~600초 범위
+
+> DEL product:123
+(integer) 1
+[PASS] DEL은 1건 삭제
+
+=== 2. maxmemory 초과 시 키 제거 ===
+기준 used_memory: 5529416 bytes (모듈 포함 빈 서버)
+[PASS] 기준 사용량이 2MB를 넘으므로 2mb 제한은 부적합
+
+> CONFIG SET maxmemory 8mb
+OK
+> CONFIG SET maxmemory-policy allkeys-lru
+OK
+> CONFIG GET maxmemory-policy
+1) "maxmemory-policy"
+2) "allkeys-lru"
+> INFO stats (발췌)
+evicted_keys:4982
+> DBSIZE
+1587
+[PASS] evicted_keys > 0 (키가 실제로 제거됨)
+
+[PASS] 남은 키 수가 기록 시도(8,000)보다 적음
+
+[PASS] used_memory가 maxmemory(8MB) 부근에서 유지됨
+
+결과: 10/10 통과

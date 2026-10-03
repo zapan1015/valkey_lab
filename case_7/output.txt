@@ -1,0 +1,35 @@
+=== 1. 구독자가 있을 때 ===
+> PUBSUB NUMSUB alerts -> 구독자 1명
+[PASS] 구독자 1명 확인
+
+> PUBLISH alerts "price changed: 59000"
+(integer) 1
+[PASS] PUBLISH 반환값 1 (수신자 1명)
+
+구독자 터미널 출력:
+1) "subscribe"
+2) "alerts"
+3) (integer) 1
+1) "message"
+2) "alerts"
+3) "price changed: 59000"
+
+[PASS] 구독자가 메시지를 수신
+
+=== 2. 구독자가 없을 때 ===
+> PUBSUB NUMSUB alerts -> 구독자 0명
+[PASS] 구독자 0명 확인(이전 구독자가 남아 있지 않음)
+
+> PUBLISH alerts "missed message"
+(integer) 0
+[PASS] PUBLISH 반환값 0 (수신자 없음)
+
+=== 3. 늦게 구독한 클라이언트 ===
+늦은 구독자 출력:
+1) "subscribe"
+2) "alerts"
+3) (integer) 1
+
+[PASS] 구독 확인 응답만 있고 'missed message'는 없음
+
+결과: 6/6 통과

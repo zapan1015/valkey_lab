@@ -1,0 +1,9 @@
+services:
+  valkey:
+    image: valkey/valkey-bundle:latest
+    container_name: valkey-case1
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 15

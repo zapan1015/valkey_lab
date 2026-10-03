@@ -1,0 +1,19 @@
+services:
+  valkey:
+    image: valkey/valkey-bundle:latest
+    container_name: valkey-case5
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+  pyclient:
+    image: python:3.12-slim
+    profiles: ["tools"]
+    container_name: pyclient-case5
+    working_dir: /work
+    volumes:
+      - .:/work
+    depends_on:
+      valkey:
+        condition: service_healthy

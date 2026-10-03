@@ -1,0 +1,69 @@
+/* Valkey 활용 사례 8가지 - 조판 지정서 (HTML/PDF 변환용 스타일시트)
+ *
+ * 지정 폰트 규격
+ *   책 본문 / 표 / 캡션 / 영문 기술 용어 : Noto Sans KR
+ *   장·절 제목                             : Noto Sans KR Bold (700)
+ *   코드 및 SQL 블록                       : DejaVu Sans Mono
+ *
+ * 라이선스: Noto Sans KR(SIL Open Font License 1.1), DejaVu Sans Mono(Bitstream Vera 파생 자유 라이선스).
+ * 두 폰트 모두 상업 출판물 임베딩이 가능하지만, 인쇄 의뢰 전 출판사의 폰트 라이선스 점검 절차를 따른다.
+ *
+ * 사용 예: pandoc valkey_usecases_chapter.md -o chapter.html --css book_style.css --standalone
+ */
+
+:root {
+  --font-text: "Noto Sans KR", sans-serif;
+  --font-code: "DejaVu Sans Mono", monospace;
+}
+
+body {
+  font-family: var(--font-text);
+  font-weight: 400;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+/* 장/절 제목: Noto Sans KR Bold */
+h1, h2, h3, h4 {
+  font-family: var(--font-text);
+  font-weight: 700;
+}
+
+/* 표 */
+table, th, td {
+  font-family: var(--font-text);
+}
+th { font-weight: 700; }
+
+/* 캡션: 표 제목(굵은 단락)과 그림 제목 */
+figcaption, caption, p > strong:only-child {
+  font-family: var(--font-text);
+}
+
+/* 영문 기술 용어는 본문과 동일한 Noto Sans KR 사용 (인라인 코드는 아래에서 별도 처리) */
+em, strong, a {
+  font-family: var(--font-text);
+}
+
+/* 코드 및 SQL 블록, 인라인 코드: DejaVu Sans Mono */
+pre, code, kbd, samp, pre code {
+  font-family: var(--font-code);
+  font-size: 0.92em;
+}
+pre {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 본문 중 callout(인용문 블록) */
+blockquote {
+  font-family: var(--font-text);
+  border-left: 4px solid #888;
+  padding: 0.4em 1em;
+  margin: 1em 0;
+}
+
+@media print {
+  pre, blockquote, table { page-break-inside: avoid; }
+}

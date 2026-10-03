@@ -1,0 +1,59 @@
+=== 1. 세션 생성과 조회 ===
+> HSET session:8f2a user_id 42 role user cart_id c-1001
+(integer) 3
+[PASS] 필드 3개 생성
+
+> EXPIRE session:8f2a 1800
+(integer) 1
+[PASS] EXPIRE 성공
+
+> HGETALL session:8f2a
+1) "user_id"
+2) "42"
+3) "role"
+4) "user"
+5) "cart_id"
+6) "c-1001"
+[PASS] 세 필드가 모두 조회됨
+
+> TTL session:8f2a
+(integer) 1800
+[PASS] TTL이 1795~1800초
+
+=== 2. 활동 시 만료 시간 갱신 ===
+> TTL session:8f2a (2초 경과)
+(integer) 1797
+[PASS] 2초 경과 후 TTL이 감소
+
+> EXPIRE session:8f2a 1800
+(integer) 1
+> TTL session:8f2a (갱신 직후)
+(integer) 1800
+[PASS] 갱신 후 TTL이 다시 1799 이상
+
+=== 3. 필드 단위 수정 ===
+> HSET session:8f2a role admin
+(integer) 0
+[PASS] 기존 필드 수정은 0 반환
+
+> HGET session:8f2a role
+"admin"
+[PASS] role이 admin으로 변경
+
+[PASS] 수정 후에도 TTL 유지
+
+=== 4. 유휴 세션 자동 만료 ===
+> EXISTS session:idle (3초 경과)
+(integer) 0
+[PASS] TTL 2초 세션이 자동 삭제됨
+
+=== 5. 로그아웃 ===
+> DEL session:8f2a
+(integer) 1
+[PASS] DEL은 1건 삭제
+
+> EXISTS session:8f2a
+(integer) 0
+[PASS] 삭제 후 세션 없음
+
+결과: 12/12 통과

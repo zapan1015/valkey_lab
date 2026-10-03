@@ -1,0 +1,47 @@
+=== 1. 락 획득과 경쟁 ===
+> SET lock:daily-settlement token-A NX PX 30000   (A)
+OK
+[PASS] A가 락 획득(OK)
+
+> SET lock:daily-settlement token-B NX PX 30000   (B)
+(nil)
+[PASS] B는 획득 실패(nil)
+
+=== 2. 소유자 검증 후 해제 ===
+> EVAL <release> 1 lock:daily-settlement token-B   (B)
+(integer) 0
+[PASS] B의 잘못된 토큰은 해제 불가(0)
+
+[PASS] 락은 여전히 token-A 소유
+
+> EVAL <release> 1 lock:daily-settlement token-A   (A)
+(integer) 1
+[PASS] A가 해제(1)
+
+> SET lock:daily-settlement token-B NX PX 30000   (B, 재시도)
+OK
+[PASS] 해제 후 B가 락 획득
+
+=== 3. 동시 경쟁: 20개 클라이언트가 동시에 시도 ===
+획득 성공 1명, 실패 19명
+
+[PASS] 정확히 1명만 락 획득
+
+=== 4. TTL 만료로 자동 해제 ===
+> SET lock:test token-A NX PX 3000
+OK
+> PTTL lock:test
+(integer) 2812
+[PASS] PTTL이 1~3000ms
+
+> GET lock:test (3.5초 경과)
+(nil)
+[PASS] 만료 후 락이 사라짐(nil)
+
+=== 5. [위험 시연] 소유자 검증 없는 DEL ===
+A가 락을 쥔 상태에서, 락을 갖지 못한 B가 단순 DEL을 실행하면:
+> DEL lock:unsafe   (B)
+(integer) 1
+[PASS] 남의 락이 삭제됨(1) -> 반드시 토큰 검증이 필요
+
+결과: 10/10 통과
